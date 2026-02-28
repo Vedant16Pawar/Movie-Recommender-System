@@ -3,6 +3,20 @@ import pickle
 import pandas as pd
 import requests
 
+movies_dict=pickle.load(open('movie_dict.pkl','rb'))
+movies = pd.DataFrame(movies_dict)
+
+# -----------------------------
+# Compute Similarity (Modified Part)
+# -----------------------------
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+cv = CountVectorizer(max_features=5000, stop_words='english')
+vectors = cv.fit_transform(movies['tags']).toarray()
+
+similarity = cosine_similarity(vectors)
+
 def fetch_poster(movie_id):
     response = requests.get(
         f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=1a0c26d54bd3bde6c8a3a1db23b479f6"
@@ -32,10 +46,6 @@ def recommend(movie):
         recommended_movies_poster.append(fetch_poster(movie_id))
     return recommended_movies,recommended_movies_poster
 
-movies_dict=pickle.load(open('movie_dict.pkl','rb'))
-movies = pd.DataFrame(movies_dict)
-
-similarity = pickle.load(open('similarity.pkl','rb'))
 
 st.title('Movie Recommender System')
 
